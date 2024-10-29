@@ -8,6 +8,5 @@ class Particle {
     Position position;
 
    public:
-    Particle();
     Particle(double mass, Position position);
 };

@@ -1,11 +1,4 @@
 #include "particle.hpp"
 
-Particle::Particle(double mass, Position position) {
-    this->mass = mass;
-    this->position = position;
-}
-
-Particle::Particle() {
-    this->mass = 0;
-    this->position = Position();
-}
+Particle::Particle(double mass, Position position)
+    : mass{mass}, position{position} {}

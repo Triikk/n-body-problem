@@ -1,8 +1,4 @@
 #include <iostream>
-#include <cmath>
+#include "quadtree.hpp"
 
-using namespace std;
-
-int main() {
-    cout << sqrt(100) << endl;
-}
+int main() { Quadtree* qt = new Quadtree(1000); }
