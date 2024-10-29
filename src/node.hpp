@@ -8,12 +8,11 @@
 
 class Node {
    public:
-    Node* father;
     std::vector<Node*> children;
     Position origin;
     long double length;
-    std::optional<Particle> particle;
+    Particle* particle;
 
-   public:
-    Node(Position origin, long double length);
+    Node(Position origin, long double length, Particle* particle);
+    void split();
 };

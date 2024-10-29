@@ -7,8 +7,9 @@
 class Quadtree {
    public:
     long double length;
-    std::optional<Node> root;
+    Node* root;
 
    public:
     Quadtree(long double length);
+    void add(Particle* particle);
 };
