@@ -9,4 +9,6 @@ class Particle {
 
    public:
     Particle(double mass, Position position);
+    // friend std::ostream& operator<<(std::ostream& os, const Particle*& p);
+    std::string toString();
 };

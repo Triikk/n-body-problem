@@ -56,20 +56,15 @@ void Quadtree::add(Particle* particle) {
  * Update total mass and center of mass of each node below `node`.
  */
 void update(Node* node) {
-    // if (node == nullptr) {
-    //     return;
-    // }
     if (node->children.empty() && !node->particle) {  // leaf with no particle
-        std::cout << "leaf with no particle at " << node->origin.x << "," << node->origin.y;
         node->totalMass = 0;
         return;
     } else if (node->children.empty() && node->particle) {  // leaf with particle
-        node->totalMass += node->particle->mass;
-        // std::cout << "adding particle with mass " << node->particle->mass;
-        node->centerOfMass += node->particle->position;
+        node->totalMass = abs(node->particle->mass);
+        node->centerOfMass = node->particle->position;
         return;
     } else if (!node->children.empty()) {
-        for (Node* child : node->children) {
+        for (auto& child : node->children) {
             update(child);
             node->totalMass += child->totalMass;
             node->centerOfMass += child->centerOfMass * child->totalMass;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <ostream>
 
 class Position {
    public:
@@ -12,6 +13,8 @@ class Position {
     Position operator+=(const Position& p);
     Position operator*(long double scalar);
     Position operator/=(long double scalar);
+    // friend std::ostream& operator<<(std::ostream& os, const Position& p);
+    std::string toString();
 
     static long double distance(Position p1, Position p2);
 };

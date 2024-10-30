@@ -17,4 +17,5 @@ class Node {
 
     Node(Position origin, long double length, Particle* particle);
     void split();
+    ~Node();
 };
