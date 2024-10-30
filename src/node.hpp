@@ -12,6 +12,8 @@ class Node {
     Position origin;
     long double length;
     Particle* particle;
+    Position centerOfMass;
+    double totalMass;
 
     Node(Position origin, long double length, Particle* particle);
     void split();

@@ -12,4 +12,5 @@ class Quadtree {
    public:
     Quadtree(long double length);
     void add(Particle* particle);
+    void computeApproximationValues();
 };
