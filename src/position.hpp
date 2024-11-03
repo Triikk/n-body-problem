@@ -15,6 +15,7 @@ class Position {
     Position operator+=(const Position& p);
     Position operator*(long double scalar);
     Position operator/=(long double scalar);
+    bool operator==(const Position& p);
     friend ostream& operator<<(ostream& os, const Position& p);
     string toString();
 

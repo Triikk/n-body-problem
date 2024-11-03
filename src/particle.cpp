@@ -9,3 +9,5 @@ ostream& operator<<(ostream& os, const Particle& p) {
 }
 
 string Particle::toString() { return "Particle<mass=" + to_string(mass) + ",position=" + position.toString() + ">"; }
+
+bool Particle::operator==(const Particle& p) { return mass == p.mass && position == p.position; }

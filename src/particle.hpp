@@ -13,4 +13,5 @@ class Particle {
     Particle(double mass, Position position);
     friend ostream& operator<<(ostream& os, const Particle& p);
     string toString();
+    bool operator==(const Particle& p);
 };
