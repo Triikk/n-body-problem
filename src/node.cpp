@@ -8,7 +8,6 @@ Node::Node(Position origin, long double length, Particle *particle)
 
 void Node::split() {
     assert(children.empty());
-    // children = vector<Node *>();
     children.push_back(new Node(Position(origin.x, origin.y), length / 2, nullptr));
     children.push_back(new Node(Position(origin.x, origin.y + length / 2), length / 2, nullptr));
     children.push_back(new Node(Position(origin.x + length / 2, origin.y), length / 2, nullptr));
@@ -27,6 +26,13 @@ Node::~Node() {
 }
 
 ostream &operator<<(ostream &os, const Node &n) {
-    os << "Node<origin=" << n.origin << ",length=" << n.length << ",particle=" << *n.particle << ">";
+    os << "Node<origin=" << n.origin << ",length=" << n.length << ",total mass=" << n.totalMass
+       << ",center of mass=" << n.centerOfMass << ",particle=";
+    if (n.particle) {
+        os << ",particle=" << *n.particle;
+    } else {
+        os << "none";
+    }
+    os << ">";
     return os;
 }

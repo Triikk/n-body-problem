@@ -6,26 +6,6 @@
 
 using namespace std;
 
-void print_nodes(Node* node) {
-    if (!node) {
-        cout << "\tnode is nullptr" << endl;
-        return;
-    }
-    // cout << "sono in dfs con nodo " << *node << endl;
-    if (node->particle) {
-        // print origin, particle position, center of mass, total mass with labels
-        cout << "\t" << *node << endl;
-    }
-    for (Node* child : node->children) {
-        print_nodes(child);
-    }
-}
-
-void print_tree(Quadtree* qt) {
-    cout << "print_tree" << endl;
-    print_nodes(qt->root);
-}
-
 set<Particle*> particles;
 
 bool is_outside(Quadtree* qt, Particle* p) {
@@ -33,58 +13,21 @@ bool is_outside(Quadtree* qt, Particle* p) {
            p->position.y > qt->length;  // 0 is qt origin
 }
 
-Quadtree* init(double length) {
-    cout << "init" << endl;
-    Quadtree* qt = new Quadtree(length);
-    for (int x = 0; x < length; x++) {
-        for (int y = 0; y < length; y++) {
-            Particle* p = new Particle(1, Position(x, y));
-            cout << "\t" << *p << " at " << p << ")" << endl;
-            particles.insert(p);
-            qt->add(p);
-        }
-    }
-    return qt;
-}
+// Quadtree* init(double length) {
+//     cout << "init" << endl;
+//     Quadtree* qt = new Quadtree(length);
+//     for (int x = 0; x < length; x++) {
+//         for (int y = 0; y < length; y++) {
+//             Particle* p = new Particle(1, Position(x, y));
+//             cout << "\t" << *p << " at " << p << ")" << endl;
+//             particles.insert(p);
+//             qt->add(p);
+//         }
+//     }
+//     return qt;
+// }
 
-void clean_tree(Quadtree* qt) {
-    cout << "\tclean_tree" << endl;
-    delete qt->root;
-    qt->root = nullptr;
-}
-
-void build_tree(Quadtree* qt) {
-    cout << "build_tree" << endl;
-    // safely modifying iterable while iterating
-    for (auto it = particles.begin(); it != particles.end(); it++) {
-        Particle* p = *it;
-        if (is_outside(qt, p)) {
-            cout << "\terasing from set particle " << *p << endl;
-            delete p;
-            particles.erase(p);
-        } else {
-            cout << "\tadding particle " << *p << " to tree" << endl;
-            qt->add(p);
-        }
-    }
-}
-
-void rebuild_tree(Quadtree* qt) {
-    cout << "rebuild_tree" << endl;
-    clean_tree(qt);
-    assert(!qt->root);
-    build_tree(qt);
-    assert(qt->root);
-}
-
-void destroy_tree(Quadtree*& qt) {
-    cout << "destroy_tree" << endl;
-    clean_tree(qt);
-    delete qt;
-    qt = nullptr;
-}
-
-void clear_particles() {
+void clearParticles() {
     for (auto it = particles.begin(); it != particles.end(); it++) {
         Particle* p = *it;
         delete p;
@@ -92,8 +35,33 @@ void clear_particles() {
     particles.clear();
 }
 
+void initializeRandomParticles(int count, int length) {
+    for (int i = 0; i < count; i++) {
+        Particle* p;
+        do {
+            p = new Particle(1, Position(rand() % length, rand() % length));
+        } while (particles.find(p) != particles.end());
+        cout << "\t" << *p << " at " << p << ")" << endl;
+        particles.insert(p);
+    }
+}
+
+void initializeSequentialParticles(double max) {
+    for (int x = 0; x < max; x++) {
+        for (int y = 0; y < max; y++) {
+            Particle* p = new Particle(1, Position(x, y));
+            cout << "\t" << *p << " at " << p << ")" << endl;
+            particles.insert(p);
+        }
+    }
+}
+
 int main() {
-    Quadtree* qt = init(10);
+    int length = 100;
+    int count = 20;
+    initializeRandomParticles(count, length);
+
+    Quadtree* qt = new Quadtree(length, particles);
     qt->computeApproximationValues();
 
     for (auto& p : particles) {
@@ -101,30 +69,13 @@ int main() {
         p->position.y += 0.001;
     }
 
-    clean_tree(qt);
-    assert(!qt->root);  // qt root is nullptr
+    qt->rebuild(particles);
+    qt->computeApproximationValues();
+    qt->print();
+    qt->printNodes();
 
-    build_tree(qt);
-    assert(qt->root);
-
-    rebuild_tree(qt);
-
-    // clean_tree(qt);
-    // assert(!qt->root);
-    print_tree(qt);
-
-    destroy_tree(qt);
-    clear_particles();
-    assert(!qt);
+    delete qt;
+    clearParticles();
+    // assert(!qt);
     assert(particles.empty());
-
-    // for (auto it = particles.begin(); it != particles.end(); it++) {
-    //     Particle* p = *it;
-    //     cout << "erasing " << p << "(" << *p << ")" << endl;
-    //     delete p;
-    // }
-    // particles.clear();
-    // dfs(qt->root);
-
-    // delete qt;
 }
