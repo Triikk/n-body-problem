@@ -8,24 +8,10 @@ using namespace std;
 
 set<Particle*> particles;
 
-bool is_outside(Quadtree* qt, Particle* p) {
+bool isOutside(Quadtree* qt, Particle* p) {
     return p->position.x < 0 || p->position.x > qt->length || p->position.y < 0 ||
            p->position.y > qt->length;  // 0 is qt origin
 }
-
-// Quadtree* init(double length) {
-//     cout << "init" << endl;
-//     Quadtree* qt = new Quadtree(length);
-//     for (int x = 0; x < length; x++) {
-//         for (int y = 0; y < length; y++) {
-//             Particle* p = new Particle(1, Position(x, y));
-//             cout << "\t" << *p << " at " << p << ")" << endl;
-//             particles.insert(p);
-//             qt->add(p);
-//         }
-//     }
-//     return qt;
-// }
 
 void clearParticles() {
     for (auto it = particles.begin(); it != particles.end(); it++) {
@@ -53,6 +39,35 @@ void initializeSequentialParticles(double max) {
             cout << "\t" << *p << " at " << p << ")" << endl;
             particles.insert(p);
         }
+    }
+}
+
+void updateParticleRecursive(Node* n, Particle* p, double theta) {
+    if (n->children.empty() && !n->particle) {
+        // empty node without children
+        return;
+    } else if (n->particle) {
+        // we reached a leaf so we just calculate the force
+        // p->mass = n->particle->mass * 2; // fix with formula
+    } else if ((n->length / Position::distance(n->centerOfMass, p->position)) < theta) {
+        // maybe add !n->particle to condition
+        // p->mass = n->particle->mass * something; // fix with formula
+    } else {
+        for (auto& child : n->children) {
+            updateParticleRecursive(child, p, theta);
+        }
+    }
+}
+
+void updateParticle(Quadtree* qt, Particle* p, double theta) {}
+
+void updateParticles(Quadtree* qt, double theta) {
+    set<Particle*> tmpParticles;
+    for (auto& p : particles) {
+        tmpParticles.insert(new Particle(p->mass, p->position));
+    }
+    for (auto& p : tmpParticles) {
+        updateParticle(qt, p, theta);  // copia temporanea
     }
 }
 
