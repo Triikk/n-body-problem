@@ -1,26 +1,32 @@
 #include "node.hpp"
 
 #include <iostream>
+#include <cassert>
 
-Node::Node(Position origin, long double length, Particle* particle)
+Node::Node(Position origin, long double length, Particle *particle)
     : origin{origin}, length{length}, particle{particle}, totalMass{0} {}
 
 void Node::split() {
-    children = std::vector<Node*>(4);
-    children[0] = new Node(Position(origin.x, origin.y), length / 2, nullptr);
-    children[1] = new Node(Position(origin.x, origin.y + length / 2), length / 2, nullptr);
-    children[2] = new Node(Position(origin.x + length / 2, origin.y), length / 2, nullptr);
-    children[3] = new Node(Position(origin.x + length / 2, origin.y + length / 2), length / 2, nullptr);
+    assert(children.empty());
+    // children = vector<Node *>();
+    children.push_back(new Node(Position(origin.x, origin.y), length / 2, nullptr));
+    children.push_back(new Node(Position(origin.x, origin.y + length / 2), length / 2, nullptr));
+    children.push_back(new Node(Position(origin.x + length / 2, origin.y), length / 2, nullptr));
+    children.push_back(new Node(Position(origin.x + length / 2, origin.y + length / 2), length / 2, nullptr));
 }
 
 Node::~Node() {
-    // std::cout << "sto chiamando " << length << "," << origin.toString() << " " << particle->toString() << std::endl;
-    if (children.empty()) {
-        std::cout << "arrivo" << std::endl;
+    if (!children.empty()) {
         delete children[0];
         delete children[1];
         delete children[2];
         delete children[3];
     }
+    children.clear();
     // si cancella da solo
+}
+
+ostream &operator<<(ostream &os, const Node &n) {
+    os << "Node<origin=" << n.origin << ",length=" << n.length << ",particle=" << *n.particle << ">";
+    return os;
 }

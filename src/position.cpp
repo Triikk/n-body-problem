@@ -12,13 +12,11 @@ Position Position::operator*(long double scalar) { return Position(x * scalar, y
 
 Position Position::operator/=(long double scalar) { return Position(x / scalar, y / scalar); }
 
-long double Position::distance(Position p1, Position p2) {
-    return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+long double Position::distance(Position p1, Position p2) { return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2)); }
+
+ostream& operator<<(ostream& os, const Position& p) {
+    os << "(" << p.x << "," << p.y << ")";
+    return os;
 }
 
-// std::ostream& operator<<(std::ostream& os, const Position& p) {
-//     os << "(" << p.x << "," << p.y << ")";
-//     return os;
-// }
-
-std::string Position::toString() { return "(position)"; }
+string Position::toString() { return "(position)"; }

@@ -44,7 +44,7 @@ Node* getNodeToInsert(Node* node, Particle* particle) {
 
 void Quadtree::add(Particle* particle) {
     // there is no root
-    if (root == nullptr) {
+    if (!root) {
         root = new Node(particle->position, length, particle);
         return;
     }

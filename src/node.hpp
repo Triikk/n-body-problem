@@ -6,9 +6,11 @@
 #include <optional>
 #include <vector>
 
+using namespace std;
+
 class Node {
    public:
-    std::vector<Node*> children;
+    vector<Node*> children;
     Position origin;
     long double length;
     Particle* particle;
@@ -18,4 +20,5 @@ class Node {
     Node(Position origin, long double length, Particle* particle);
     void split();
     ~Node();
+    friend ostream& operator<<(ostream& os, const Node& n);
 };

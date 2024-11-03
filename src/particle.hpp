@@ -2,6 +2,8 @@
 
 #include "position.hpp"
 
+using namespace std;
+
 class Particle {
    public:
     double mass;
@@ -9,6 +11,6 @@ class Particle {
 
    public:
     Particle(double mass, Position position);
-    // friend std::ostream& operator<<(std::ostream& os, const Particle*& p);
-    std::string toString();
+    friend ostream& operator<<(ostream& os, const Particle& p);
+    string toString();
 };
