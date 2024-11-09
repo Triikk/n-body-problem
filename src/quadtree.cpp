@@ -5,10 +5,20 @@
 #include <iostream>
 #include <set>
 #include <cassert>
+#include <cmath>
 
 Quadtree::Quadtree(long double length) : length{length}, root{nullptr} {}
 
-Quadtree::Quadtree(long double length, set<Particle*>& particles) : length{length}, root{nullptr} { build(particles); }
+/**
+ * defines the qt length and already sets the particles in the correct quadrants
+ */
+Quadtree::Quadtree(long double length, vector<Particle>& particles) : length{length}, root{nullptr} {
+    cout << "qt constructor:" << endl;
+    for (auto& p : particles) {
+        cout << "\tparticle " << p << " at " << &p << endl;
+    }
+    build(particles);
+}
 
 /**
  * Given a node and a particle, computes the child in which the particle should be placed
@@ -32,6 +42,10 @@ void push_down(Node* node) {
  * Return the node to insert the particle.
  */
 Node* getNodeToInsert(Node* node, Particle* particle) {
+    if ((std::isnan(particle->position.x)) || (std::isnan(particle->position.y))) {
+        cout << "LA COLPEVOLE: ABITA IN VIA " << particle << " , A BREVE IL PROCESSO." << endl;
+        assert(false);
+    }
     if (node->children.empty() && !node->particle) {  // leaf with no particle
         return node;
     } else if (node->children.empty() && node->particle) {  // leaf with particle
@@ -39,8 +53,8 @@ Node* getNodeToInsert(Node* node, Particle* particle) {
         return getNodeToInsert(node, particle);
     } else if (!node->children.empty()) {
         int index = compute_child_index(node, particle);
-        std::cout << "getNodeToInsert node: " << *node << ",particle:  " << *particle << std::endl;
-        std::cout << "index: " << index << std::endl;
+        // std::cout << "getNodeToInsert node: " << *node << ",particle:  " << *particle << std::endl;
+        // std::cout << "index: " << index << std::endl;
         return getNodeToInsert(node->children[index], particle);
     }
     return nullptr;
@@ -52,6 +66,7 @@ void Quadtree::add(Particle* particle) {
         root = new Node(Position(0, 0), length, particle);
         return;
     }
+    // cout << "particle " << *particle << " at " << particle << endl;
     Node* node = getNodeToInsert(root, particle);
     node->particle = particle;
 }
@@ -78,23 +93,25 @@ void update(Node* node) {
     }
     assert(false);
 }
-
+/**
+ * Compute centers of mass
+ */
 void Quadtree::computeApproximationValues() { update(root); }
 
 void Quadtree::print() { std::cout << "Quadtree<length=" << length << ",root=" << *root << ">" << std::endl; }
 
-void print_nodes(Node* node) {
+void printNodesRecursive(Node* node) {
     if (!node) {
         cout << "\tnode=<null>" << endl;
         return;
     }
     cout << "\t" << *node << endl;
     for (Node* child : node->children) {
-        print_nodes(child);
+        printNodesRecursive(child);
     }
 }
 
-void Quadtree::printNodes() { print_nodes(root); }
+void Quadtree::printNodes() { printNodesRecursive(root); }
 
 void Quadtree::clean() {
     cout << "clean tree" << endl;
@@ -102,15 +119,18 @@ void Quadtree::clean() {
     root = nullptr;
 }
 
-void Quadtree::build(set<Particle*>& particles) {
+/**
+ * adds every particle to the correct quadrant of the tree
+ */
+void Quadtree::build(vector<Particle>& particles) {
     cout << "build tree" << endl;
-    for (auto& p : particles) {
-        cout << "\tadding particle " << *p << " to tree" << endl;
-        add(p);
+    for (auto p : particles) {
+        cout << "\tadding particle " << p << " at " << &p << " to tree" << endl;
+        add(&p);
     }
 }
 
-void Quadtree::rebuild(set<Particle*>& particles) {
+void Quadtree::rebuild(vector<Particle>& particles) {
     cout << "rebuild tree" << endl;
     clean();
     assert(!root);

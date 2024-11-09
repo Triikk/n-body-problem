@@ -12,13 +12,13 @@ class Quadtree {
 
    public:
     Quadtree(long double length);
-    Quadtree(long double length, set<Particle*>& particles);
+    Quadtree(long double length, vector<Particle>& particles);
     ~Quadtree();
     void add(Particle* particle);
     void computeApproximationValues();
     void print();
     void printNodes();
     void clean();
-    void build(set<Particle*>& particles);
-    void rebuild(set<Particle*>& particles);
+    void build(vector<Particle>& particles);
+    void rebuild(vector<Particle>& particles);
 };
