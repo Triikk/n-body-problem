@@ -44,10 +44,10 @@ void initializeRandomParticles(int count, int length) {
         } while (!isPositionAvailable(p.position));
         particles.push_back(p);
     }
-    cout << "InitParticles:" << endl;
+    /*cout << "InitParticles:" << endl;
     for (auto &p : particles) {
         cout << "\tparticle " << p << " at " << &p << endl;
-    }
+    }*/
 }
 
 // generate particles sequentially
@@ -65,16 +65,18 @@ void initializeSequentialParticles(double max) {
 // the other particles. if the particles are in the same position the interaction is irrelevant
 void computeInteraction(Particle *target, Particle *actor) {
     // assert(!(target->position == actor->position));
-    float distance_module = Position::distance(target->position, actor->position);  // d
-    float dx = (target->position.x - actor->position.x);                            // d.x
-    float dy = (target->position.y - actor->position.y);                            // d.y
+    if (!(target->position == actor->position)) {
+        float distance_module = Position::distance(target->position, actor->position);  // d
+        float dx = (target->position.x - actor->position.x);                            // d.x
+        float dy = (target->position.y - actor->position.y);                            // d.y
 
-    float acc_module = G * actor->mass / pow(distance_module, 2.0);  // a
-    float acc_x = acc_module * (dx / distance_module);               // a.x
-    float acc_y = acc_module * (dy / distance_module);               // a.y
+        float acc_module = G * actor->mass / pow(distance_module, 2.0);  // a
+        float acc_x = acc_module * (dx / distance_module);               // a.x
+        float acc_y = acc_module * (dy / distance_module);               // a.y
 
-    target->acceleration.x += acc_x;
-    target->acceleration.y += acc_y;
+        target->acceleration.x += acc_x;
+        target->acceleration.y += acc_y;
+    }
 }
 
 /**
@@ -111,17 +113,25 @@ void updateParticle(Quadtree *qt, Particle *p, double theta) { updateParticleRec
  */
 void updateParticles(Quadtree *qt, double theta, double delta) {
     for (auto &p : particles) {
+        p.acceleration = Acceleration(0, 0);
+    }
+    for (auto &p : particles) {
         updateParticle(qt, &p, theta);
     }
     for (auto &p : particles) {
         p.computeDisplacement(delta);
+    }
+
+    cout << "Check particles:" << endl;
+    for (auto &p : particles) {
+        cout << "\tparticle " << p << " at " << &p << endl;
     }
     assert(!particles.empty());
 }
 
 int main() {
     int length = 100;
-    int count = 15;
+    int count = 25;
     double DELTA = 1, THETA = 1;
     initializeRandomParticles(count, length);
     // initializeSequentialParticles(length);
@@ -130,9 +140,9 @@ int main() {
     qt->computeApproximationValues();
     updateParticles(qt, THETA, DELTA);
 
-    /*qt->rebuild(particles);
+    qt->rebuild(particles);
     qt->computeApproximationValues();
-    updateParticles(qt, THETA, DELTA);*/
+    updateParticles(qt, THETA, DELTA);
 
     qt->print();
     qt->printNodes();

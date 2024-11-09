@@ -8,7 +8,8 @@ Particle::Particle(double mass, Position position)
     : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {}
 
 ostream& operator<<(ostream& os, const Particle& p) {
-    os << "<Particle<mass=" << p.mass << ",position=" << p.position << ">";
+    os << "<Particle<mass=" << p.mass << ",pos=" << p.position << ",vel=" << p.velocity << ",acc=" << p.acceleration
+       << ">";
     return os;
 }
 

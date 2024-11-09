@@ -13,10 +13,10 @@ Quadtree::Quadtree(long double length) : length{length}, root{nullptr} {}
  * defines the qt length and already sets the particles in the correct quadrants
  */
 Quadtree::Quadtree(long double length, vector<Particle>& particles) : length{length}, root{nullptr} {
-    cout << "qt constructor:" << endl;
+    /*cout << "qt constructor:" << endl;
     for (auto& p : particles) {
         cout << "\tparticle " << p << " at " << &p << endl;
-    }
+    }*/
     build(particles);
 }
 
@@ -124,7 +124,7 @@ void Quadtree::clean() {
  */
 void Quadtree::build(vector<Particle>& particles) {
     cout << "build tree" << endl;
-    for (auto p : particles) {
+    for (auto& p : particles) {
         cout << "\tadding particle " << p << " at " << &p << " to tree" << endl;
         add(&p);
     }
