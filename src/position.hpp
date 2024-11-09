@@ -1,22 +1,10 @@
 #pragma once
 
-#include <utility>
-#include <ostream>
+#include "vector.hpp"
 
-using namespace std;
-
-class Position {
+class Position : public Vector {
    public:
-    long double x;
-    long double y;
-
-    Position();
-    Position(long double x, long double y);
-    Position operator+=(const Position& p);
-    Position operator*(long double scalar);
-    Position operator/=(long double scalar);
-    bool operator==(const Position& p);
-    friend ostream& operator<<(ostream& os, const Position& p);
+    using Vector::Vector;
 
     static long double distance(Position p1, Position p2);
 };

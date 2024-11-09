@@ -26,12 +26,11 @@ Node::~Node() {
 }
 
 ostream &operator<<(ostream &os, const Node &n) {
-    os << "Node<origin=" << n.origin << ",length=" << n.length << ",total mass=" << n.totalMass
-       << ",center of mass=" << n.centerOfMass << ",particle=";
+    os << "N<org=" << n.origin << ",length=" << n.length << ",tot.mass=" << n.totalMass << ",com=" << n.centerOfMass;
     if (n.particle) {
-        os << ",particle=" << *n.particle;
+        os << *n.particle;
     } else {
-        os << "none";
+        os << ",Particle=" << "none";
     }
     os << ">";
     return os;
