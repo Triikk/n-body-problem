@@ -20,5 +20,3 @@ ostream& operator<<(ostream& os, const Position& p) {
     os << "(" << p.x << "," << p.y << ")";
     return os;
 }
-
-string Position::toString() { return "(position)"; }

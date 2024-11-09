@@ -17,7 +17,6 @@ class Position {
     Position operator/=(long double scalar);
     bool operator==(const Position& p);
     friend ostream& operator<<(ostream& os, const Position& p);
-    string toString();
 
     static long double distance(Position p1, Position p2);
 };
