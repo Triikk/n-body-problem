@@ -59,7 +59,12 @@ int main() {
         qt.build();
         qt.computeApproximationValues();
         qt.updateParticles(theta, delta);
-        view.update();  // draw particles and quadtree
+
+        view.clear();  // clear the buffer
+        view.loadParticles(qt.particles);
+        view.loadTree(qt);
+        view.render();
+
         qt.clean();
     }
 }

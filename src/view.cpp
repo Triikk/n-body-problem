@@ -8,15 +8,24 @@
 
 #include <iostream>
 
+#include <cassert>
 #include <chrono>
 #include <thread>
 
 #include "view.hpp"
+#include "quadtree.hpp"
+
+#define G 6.674304
 
 using namespace std;
 using namespace glm;
 
-GLuint matProj;
+GLuint VBO, VAO, VBOqt, VAOqt;
+
+GLuint shaderProgram;
+GLuint projectionMatrixID;
+GLFWwindow *window;
+mat4 projection;
 
 const char *vertexShaderSource = R"(
 #version 330 core
@@ -26,9 +35,6 @@ void main() {
     gl_Position = projection*vec4(aPos, 0.0, 1.0);
 }
 )";
-
-// layout(location = 1) in mat4 model;
-// model*vec4
 
 const char *fragmentShaderSource = R"(
 #version 330 core
@@ -57,38 +63,6 @@ GLuint initializeShader() {
     return shaderProgram;
 }
 
-GLuint VBO, VAO, VBOqt, VAOqt;
-// void setupBuffers(vector<Particle> particles) {
-//     glGenVertexArrays(1, &VAO);
-//     glGenBuffers(1, &VBO);
-
-//     glBindVertexArray(VAO);
-//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-//     vector<vec2> positions;
-//     for (auto &p : particles) {
-//         positions.push_back(vec2(p.position.x, p.position.y));
-//     }
-//     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec2), particles.data(), GL_DYNAMIC_DRAW);
-
-//     glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 0, (void *)0);
-//     glEnableVertexAttribArray(0);
-
-//     glBindBuffer(GL_ARRAY_BUFFER, 0);
-//     glBindVertexArray(0);
-// }
-
-#include <iostream>
-#include "quadtree.hpp"
-#include <cassert>
-
-#define G 6.674304
-
-GLuint shaderProgram;
-GLFWwindow *window;
-vector<vec2> positions;
-mat4 projection;
-
 vector<Node> getQuadtreeNodes(Node *node) {
     if (!node) {
         cout << "not node" << endl;
@@ -107,7 +81,6 @@ vector<Node> getQuadtreeNodes(Node *node) {
 
 vector<vector<vec2>> getNodesVertexes(Quadtree &qt) {
     vector<Node> nodes = getQuadtreeNodes(qt.root);
-    // cout << "nodes.size: " << nodes.size() << endl;
     vector<vector<vec2>> positions;
     for (auto &node : nodes) {
         Position(node.origin.x, node.origin.y + node.length),
@@ -121,62 +94,54 @@ vector<vector<vec2>> getNodesVertexes(Quadtree &qt) {
     return positions;
 }
 
-void View::update() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(shaderProgram);
+void View::clear() { glClear(GL_COLOR_BUFFER_BIT); }
 
-    positions.clear();
-    for (auto &p : qt.particles) {
-        positions.push_back(vec2(p.position.x, p.position.y));
-    }
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glUniformMatrix4fv(matProj, 1, GL_FALSE, value_ptr(projection));
-    glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(vec2), positions.data());
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    glEnableVertexAttribArray(0);
-    glDrawArrays(GL_POINTS, 0, positions.size());
-
-    // qt vbo
-    // cout << "qt root" << qt.root << endl;
-    vector<vector<vec2>> positions = getNodesVertexes(qt);
-    // vector<vec2> nodes = {
-    //     vec2(0, 0),
-    //     vec2(qt.length, 0),
-    //     vec2(qt.length, qt.length),
-    //     vec2(0, qt.length),
-    // };
+void View::loadTree(Quadtree &qt) {
+    vector<vector<vec2>> nodesPositions = getNodesVertexes(qt);
     glBindVertexArray(VAOqt);
     glBindBuffer(GL_ARRAY_BUFFER, VBOqt);
-    for (auto &pos : positions) {
-        // cout << pos[0].x << " " << pos[0].y << endl;
-        // cout << pos[1].x << " " << pos[1].y << endl;
-        // cout << pos[2].x << " " << pos[2].y << endl;
-        // cout << pos[3].x << " " << pos[3].y << endl;
+    for (auto &pos : nodesPositions) {
         glBufferData(GL_ARRAY_BUFFER, pos.size() * sizeof(vec2), pos.data(), GL_STATIC_DRAW);
+        glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
         glEnableVertexAttribArray(0);
         glDrawArrays(GL_LINE_LOOP, 0, pos.size());
     }
-
-    // glBindBuffer(GL_ARRAY_BUFFER, VBOqt);
-    // glUniformMatrix4fv(matProj, 1, GL_FALSE, value_ptr(projection));
-    // glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(vec2), positions.data(), GL_STATIC_DRAW);
-    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    // glEnableVertexAttribArray(0);
-    // glDrawArrays(GL_LINE_LOOP, 0, nodes.size());
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-
-    // int fps = 60;
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
 }
 
-void View::drawTree() {}
+void View::loadParticles(vector<Particle> &particles) {
+    vector<vec2> particlePositions;
+    for (auto &p : particles) {
+        particlePositions.push_back(vec2(p.position.x, p.position.y));
+    }
 
-View::View(Quadtree &qt, int windowLength) : qt{qt} {
+    // bind buffers
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // load projection matrix and particle positions
+    glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particlePositions.size() * sizeof(vec2), particlePositions.data());
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_POINTS, 0, particlePositions.size());
+}
+
+void View::render() {
+    // glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
+
+void initializeVertexBuffers() {
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAOqt);
+    glGenBuffers(1, &VBOqt);
+}
+
+View::View(Quadtree &qt, int windowLength) {
     if (!glfwInit()) {
         exit(EXIT_FAILURE);
     }
@@ -193,49 +158,34 @@ View::View(Quadtree &qt, int windowLength) : qt{qt} {
     }
 
     shaderProgram = initializeShader();
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAOqt);
-    glGenBuffers(1, &VBOqt);
+    initializeVertexBuffers();
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    vector<vec2> positions;
     for (auto &p : qt.particles) {
         positions.push_back(vec2(p.position.x, p.position.y));
     }
     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec2), positions.data(), GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
 
     // convertion from world coordinate to screen coordinate
     projection = ortho(0.0f, (float)qt.length, 0.0f, (float)qt.length, -1.0f, 1.0f);
-    matProj = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(matProj, 1, GL_FALSE, value_ptr(projection));
+    projectionMatrixID = glGetUniformLocation(shaderProgram, "projection");
 
-    glEnableVertexAttribArray(0);
     glUseProgram(shaderProgram);
-
     glPointSize(1);
     glLineWidth(0.1);
     glEnable(GL_POINT_SMOOTH);
-
-    // // qt vbo
-    // vector<vec2> nodes = {
-    //     vec2(0, 0),
-    //     vec2(qt.length, 0),
-    //     vec2(0, qt.length),
-    //     vec2(qt.length, qt.length),
-    // };
-    // glBindBuffer(GL_ARRAY_BUFFER, VBOqt);
-    // glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(vec2), nodes.data(), GL_STATIC_DRAW);
-    // glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    // glDrawArrays(GL_LINES, 0, 4);
 }
 
 View::~View() {
     glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &VAOqt);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &VBOqt);
     glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
