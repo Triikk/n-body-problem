@@ -46,14 +46,14 @@ vector<Particle> generateSequential(double max, float mass) {
 }
 
 int main() {
-    int length = 800;
+    int length = 100;
     int count = 500;
-    double delta = 0.01, theta = 0.5;
+    double delta = 0.001, theta = 1;
     float mass = 1e10;
     vector<Particle> particles = generateRandomParticles(count, length, mass);
 
     Quadtree qt = Quadtree(length, particles);
-    View view = View(qt, length);
+    View view = View(qt, 800);
 
     while (true) {
         qt.build();

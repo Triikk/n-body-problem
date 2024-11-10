@@ -10,7 +10,9 @@
 Particle::Particle() {};
 
 Particle::Particle(double mass, Position position)
-    : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {}
+    : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {
+    radius = pow(mass, 1.0 / 3.0) / 100.0;
+}
 
 ostream& operator<<(ostream& os, const Particle& p) {
     os << "<Particle<mass=" << p.mass << ",pos=" << p.position << ",vel=" << p.velocity << ",acc=" << p.acceleration

@@ -176,9 +176,9 @@ View::View(Quadtree &qt, int windowLength) {
     projectionMatrixID = glGetUniformLocation(shaderProgram, "projection");
 
     glUseProgram(shaderProgram);
-    glPointSize(1);
+    glPointSize(2);
     glLineWidth(0.1);
-    glEnable(GL_POINT_SMOOTH);
+    // glEnable(GL_POINT_SMOOTH);
 }
 
 View::~View() {

@@ -9,6 +9,7 @@ using namespace std;
 class Particle {
    public:
     double mass;
+    double radius;
     Position position;
     Velocity velocity;
     Acceleration acceleration;
