@@ -79,10 +79,12 @@ void update(Node* node) {
         node->totalMass = 0;
         return;
     } else if (node->children.empty() && node->particle) {  // leaf with particle
-        node->totalMass = abs(node->particle->mass);
+        node->totalMass = node->particle->mass;
         node->centerOfMass = node->particle->position;
         return;
     } else if (!node->children.empty()) {
+        node->totalMass = 0;
+        node->centerOfMass = Position(node->origin.x + node->length / 2, node->origin.y + node->length / 2);
         for (auto& child : node->children) {
             update(child);
             node->totalMass += child->totalMass;
