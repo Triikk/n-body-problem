@@ -6,6 +6,7 @@
 #include <set>
 #include <cassert>
 #include <cmath>
+#include <algorithm>
 
 /**
  * Initialization with length and particles
@@ -62,6 +63,58 @@ void Quadtree::add(Particle& particle) {
     // cerr << "particle " << *particle << " at " << particle << endl;
     Node* node = getNodeToInsert(root, particle);
     node->particle = &particle;
+}
+
+bool Quadtree::isOutside(Particle& p) {
+    return p.position.x < 0.0 || p.position.x > length || p.position.y < 0.0 || p.position.y > length;
+}
+
+void Quadtree::recursiveNetForce(Node* n, Particle& p, double theta) {
+    if (n->children.empty() && !n->particle) {  //  empty node without children
+        return;
+    } else if (n->particle) {  //  leaf node therefore compute interaction
+        p.computeSingleForce(*n->particle);
+    } else if ((n->length / Position::distance(n->centerOfMass, p.position)) < theta) {
+        //  grouping node which can be used for approximating the underlying tree (its subtree 8D)
+        Particle actor = Particle(n->totalMass, n->centerOfMass);
+        p.computeSingleForce(actor);
+    } else {
+        // grouping node which can't be used for approximation: therefore we recursively check its children
+        for (auto& child : n->children) {
+            recursiveNetForce(child, p, theta);
+        }
+    }
+}
+
+void Quadtree::computeNetForce(Particle& p, double theta) {
+    // cerr << "computeNetForce " << p << endl;
+    if (isOutside(p)) {
+        return;
+    }
+    recursiveNetForce(root, p, theta);
+}
+
+/**
+ * Update the state of each particle after one round of interaction.
+ * @param qt quadtree
+ * @param theta threshold for the approximation
+ * @param delta time step
+ * @param particles vector of particles
+ */
+void Quadtree::updateParticles(double theta, double delta) {
+    for (auto& p : particles) {
+        p.acceleration = Acceleration(0, 0);
+    }
+    for (auto& p : particles) {
+        computeNetForce(p, theta);
+    }
+    // remove particles outside the quadtree
+    particles.erase(std::remove_if(particles.begin(), particles.end(), [&](Particle& p) { return isOutside(p); }),
+                    particles.end());
+    for (auto& p : particles) {
+        p.computeDisplacement(delta);
+    }
+    assert(!particles.empty());
 }
 
 /**
@@ -121,6 +174,9 @@ void Quadtree::clean() {
 void Quadtree::build() {
     cerr << "build tree" << endl;
     for (auto& p : particles) {
+        if (isOutside(p)) {
+            continue;
+        }
         cerr << "\tadding particle " << p << " at " << &p << " to tree" << endl;
         add(p);
     }

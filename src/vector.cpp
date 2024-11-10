@@ -13,6 +13,8 @@ Vector Vector::operator/=(long double scalar) { return Vector(x / scalar, y / sc
 
 bool Vector::operator==(const Vector& v) { return abs(x - v.x) < 1e-6 && abs(y - v.y) < 1e-6; }
 
+bool Vector::operator!=(const Vector& v) { return !(*this == v); }
+
 ostream& operator<<(ostream& os, const Vector& v) {
     os << "(" << v.x << "," << v.y << ")";
     return os;

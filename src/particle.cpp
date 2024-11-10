@@ -1,6 +1,11 @@
 #include <ostream>
+#include <cassert>
+#include <cmath>
+
 #include "position.hpp"
 #include "particle.hpp"
+
+#define G 6.674304e-8
 
 Particle::Particle() {};
 
@@ -21,4 +26,20 @@ void Particle::computeDisplacement(float delta) {
 
     position.x += velocity.x * delta;
     position.y += velocity.y * delta;
+}
+
+void Particle::computeSingleForce(Particle& actor) {
+    // assert(!(position == actor.position));
+    if (position != actor.position) {
+        float distance_module = Position::distance(position, actor.position);  // d
+        float dx = actor.position.x - position.x;                              // d.x
+        float dy = actor.position.y - position.y;                              // d.y
+
+        float acc_module = G * actor.mass / pow(distance_module, 2.0);  // a
+        float acc_x = acc_module * (dx / distance_module);              // a.x
+        float acc_y = acc_module * (dy / distance_module);              // a.y
+
+        acceleration.x += acc_x;
+        acceleration.y += acc_y;
+    }
 }

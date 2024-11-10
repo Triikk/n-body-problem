@@ -19,4 +19,5 @@ class Particle {
     friend ostream& operator<<(ostream& os, const Particle& p);
     bool operator==(const Particle& p);
     void computeDisplacement(float delta);
+    void computeSingleForce(Particle& actor);
 };

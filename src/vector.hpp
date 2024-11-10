@@ -16,6 +16,7 @@ class Vector {
     Vector operator*(long double scalar);
     Vector operator/=(long double scalar);
     bool operator==(const Vector& v);
+    bool operator!=(const Vector& v);
     friend ostream& operator<<(ostream& os, const Vector& v);
     string toString();
 };
