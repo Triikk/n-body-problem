@@ -7,18 +7,18 @@
 
 class Quadtree {
    public:
-    long double length;
+    float length;
     Node* root;
+    vector<Particle>& particles;
 
    public:
-    Quadtree(long double length);
-    Quadtree(long double length, vector<Particle>& particles);
+    Quadtree(float length, vector<Particle>& particles);
     ~Quadtree();
-    void add(Particle* particle);
-    void computeApproximationValues();
+    void add(Particle& particle);
     void print();
     void printNodes();
     void clean();
-    void build(vector<Particle>& particles);
-    void rebuild(vector<Particle>& particles);
+    void build();
+    void computeApproximationValues();
+    void updateParticles(double theta, double delta);
 };

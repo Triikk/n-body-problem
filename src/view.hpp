@@ -3,12 +3,16 @@
 #include <vector>
 
 #include "particle.hpp"
+#include "quadtree.hpp"
 
 using namespace std;
 
 class View {
    public:
-    View(int width, int height, vector<Particle> particles);
+    Quadtree qt;
+
+   public:
+    View(Quadtree &qt, int windowLength);
     ~View();
     void update();
 };
