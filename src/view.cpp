@@ -105,8 +105,8 @@ void View::update() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    int fps = 60;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
+    // int fps = 60;
+    // std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
 }
 
 View::View(Quadtree &qt, int windowLength) : qt{qt} {
@@ -147,7 +147,7 @@ View::View(Quadtree &qt, int windowLength) : qt{qt} {
     glEnableVertexAttribArray(0);
     glUseProgram(shaderProgram);
 
-    glPointSize(3);
+    glPointSize(2);
     glEnable(GL_POINT_SMOOTH);
 }
 

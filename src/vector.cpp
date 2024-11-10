@@ -11,7 +11,7 @@ Vector Vector::operator*(long double scalar) { return Vector(x * scalar, y * sca
 
 Vector Vector::operator/=(long double scalar) { return Vector(x / scalar, y / scalar); }
 
-bool Vector::operator==(const Vector& v) { return x == v.x && y == v.y; }
+bool Vector::operator==(const Vector& v) { return abs(x - v.x) < 1e-6 && abs(y - v.y) < 1e-6; }
 
 ostream& operator<<(ostream& os, const Vector& v) {
     os << "(" << v.x << "," << v.y << ")";

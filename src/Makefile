@@ -8,5 +8,8 @@ all: $(OUT)
 $(OUT): *.cpp *.hpp
 	$(CC) -o $(OUT) glad.c *.cpp ${CFLAGS} ${LFLAGS}
 
+o: *.cpp *.hpp
+	$(CC) -o $(OUT) glad.c *.cpp -O3 ${LFLAGS}
+
 clean:
 	rm -f $(OUT)
