@@ -151,10 +151,10 @@ void Quadtree::print() { std::cerr << "Quadtree<length=" << length << ",root=" <
 
 void printNodesRecursive(Node* node) {
     if (!node) {
-        cerr << "\tnode=<null>" << endl;
+        // cerr << "\tnode=<null>" << endl;
         return;
     }
-    cerr << "\t" << *node << endl;
+    // cerr << "\t" << *node << endl;
     for (Node* child : node->children) {
         printNodesRecursive(child);
     }
@@ -163,7 +163,7 @@ void printNodesRecursive(Node* node) {
 void Quadtree::printNodes() { printNodesRecursive(root); }
 
 void Quadtree::clean() {
-    cerr << "clean tree" << endl;
+    // cerr << "clean tree" << endl;
     delete root;
     root = nullptr;
 }
@@ -172,12 +172,12 @@ void Quadtree::clean() {
  * adds every particle to the correct quadrant of the tree
  */
 void Quadtree::build() {
-    cerr << "build tree" << endl;
+    // cerr << "build tree" << endl;
     for (auto& p : particles) {
         if (isOutside(p)) {
             continue;
         }
-        cerr << "\tadding particle " << p << " at " << &p << " to tree" << endl;
+        // cerr << "\tadding particle " << p << " at " << &p << " to tree" << endl;
         add(p);
     }
     // computeApproximationValues();

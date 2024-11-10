@@ -38,7 +38,7 @@ vector<Particle> generateSequential(double max, float mass) {
     for (int x = 0; x < max; x++) {
         for (int y = 0; y < max; y++) {
             Particle p = Particle(mass, Position(x, y));
-            cerr << "\t" << p << " at " << &p << ")" << endl;
+            // cerr << "\t" << p << " at " << &p << ")" << endl;
             particles.push_back(p);
         }
     }
@@ -47,7 +47,7 @@ vector<Particle> generateSequential(double max, float mass) {
 
 int main() {
     int length = 800;
-    int count = 200;
+    int count = 500;
     double delta = 0.01, theta = 0.5;
     float mass = 1e10;
     vector<Particle> particles = generateRandomParticles(count, length, mass);
@@ -59,7 +59,7 @@ int main() {
         qt.build();
         qt.computeApproximationValues();
         qt.updateParticles(theta, delta);
+        view.update();  // draw particles and quadtree
         qt.clean();
-        view.update();
     }
 }

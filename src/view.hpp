@@ -9,10 +9,11 @@ using namespace std;
 
 class View {
    public:
-    Quadtree qt;
+    Quadtree& qt;
 
    public:
-    View(Quadtree &qt, int windowLength);
+    View(Quadtree& qt, int windowLength);
     ~View();
     void update();
+    void drawTree();
 };
