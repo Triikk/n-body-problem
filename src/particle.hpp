@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "position.hpp"
 #include "velocity.hpp"
 #include "acceleration.hpp"
@@ -12,7 +14,9 @@ class Particle {
     double radius;
     Position position;
     Velocity velocity;
+    Velocity collision_velocity;
     Acceleration acceleration;
+    vector<Particle&> colliding_particles;
 
    public:
     Particle();
@@ -20,5 +24,10 @@ class Particle {
     friend ostream& operator<<(ostream& os, const Particle& p);
     bool operator==(const Particle& p);
     void computeDisplacement(float delta);
+    void computeCollisionDisplacement(float delta);
     void computeSingleForce(Particle& actor);
+    void addCollidingParticle(Particle& particle);
+    void computeCollisions();
+
+    static bool doCollide(Particle& p1, Particle& p2);
 };

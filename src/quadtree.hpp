@@ -21,12 +21,10 @@ class Quadtree {
     void build();
     void computeApproximationValues();
     void updateParticles(double theta, double delta);
-    void manageCollisions();
+    void manageCollisions(double delta);
     bool isOutside(Particle& p);
 
    private:
     void computeNetForce(Particle& p, double theta);
     void recursiveNetForce(Node* node, Particle& p, double theta);
-    bool checkCollisions(Node* node, Particle& p);
-    vector<Node*> getNodesAround(Particle& p);
 };

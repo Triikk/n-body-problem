@@ -14,6 +14,14 @@ void Node::split() {
     children.push_back(new Node(Position(origin.x + length / 2, origin.y + length / 2), length / 2, nullptr));
 }
 
+bool Node::containsCollisionArea(Particle &p) {
+    Position pBottom = Position(p.position.x - 2 * p.radius, p.position.y - 2 * p.radius);
+    Position pTop = Position(p.position.x + 2 * p.radius, p.position.y + 2 * p.radius);
+    Position nBottom = Position(origin.x, origin.y);
+    Position nTop = Position(origin.x + length, origin.y + length);
+    return (pBottom <= nTop) && (nBottom <= pTop);
+}
+
 Node::~Node() {
     if (!children.empty()) {
         delete children[0];

@@ -19,6 +19,7 @@ class Node {
 
     Node(Position origin, long double length, Particle* particle);
     void split();
+    bool containsCollisionArea(Particle& p);
     ~Node();
     friend ostream& operator<<(ostream& os, const Node& n);
 };

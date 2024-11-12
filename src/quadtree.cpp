@@ -94,52 +94,55 @@ void Quadtree::computeNetForce(Particle& p, double theta) {
     recursiveNetForce(root, p, theta);
 }
 
-// bool contains(Node* node, Particle& p) {
-//     return p.position.x > node->origin.x && p.position.x < node->origin.x + node->length &&
-//            p.position.y > node->origin.y && p.position.y < node->origin.y + node->length;
-// }
+// traverse the tree recursively and return the vector of particles which are centered inside the area of collision
+// of p
+void findCollidingParticles(Particle& p, Node* node, vector<Particle&>& colliding_particles) {
+    if (*node->particle == p) {  // avoid checking the node which contains the particle itself
+        return;
+    }
+    if (node->children.empty() && !node->particle) {  //  empty node without children
+        return;
+    } else if (node->particle) {  //  leaf node therefore check if the particle collides
+        // TO DO
+        if (Particle::doCollide(p, *(node->particle))) {
+            colliding_particles.push_back(*(node->particle));
+        }
+        return;
+    } else {
+        // father node: recursively call on plausible children
+        for (auto& child : node->children) {
+            if (node->containsCollisionArea(p)) findCollidingParticles(p, child, colliding_particles);
+        }
+    }
+}
 
-// vector<Node*> recursiveGetNodesAround(Node* node, Particle& p) {
-//     if (!node) {
-//         return {};
-//     } else if (node->children.empty() && node->particle) {
-//         if (contains(node, p)) {
-//             return {node};
-//         }
-//     } else if (!node->children.empty() && node->particle) {
-//         vector<Node*> nodes;
-//         if (contains(node, p)) {
-//             for (auto& child : node->children) {
-//                 vector<Node*> childNodes = recursiveGetNodesAround(child, p);
-//                 for (auto& childNode : childNodes) {
-//                     if (childNode->particle && contains(childNode, p)) {
-//                         nodes.push_back(childNode);
-//                     }
-//                 }
-//             }
-//         }
-//         return nodes;
-//     }
-//     return {};
-// }
-
-// vector<Node*> Quadtree::getNodesAround(Particle& p) { return recursiveGetNodesAround(root, p); }
-
-// bool Quadtree::checkCollisions(Node* node, Particle& p) {
-//     vector<Node*> nodesAround = getNodesAround(p);
-//     for (auto& node : nodesAround) {
-//         assert(node->particle && node->particle->position);
-//         if (Position::distance(node->particle->position, p.position)) {
-//         }
-//     }
-// }
-
-void Quadtree::manageCollisions() {
+void Quadtree::manageCollisions(double delta) {
     bool foundCollisions = false;
     do {
+        for (auto& p : particles) {
+            p.colliding_particles.clear();
+            p.acceleration = Acceleration(0, 0);
+        }
         foundCollisions = false;
         for (auto& p : particles) {
-            foundCollisions = foundCollisions || checkCollisions(root, p);
+            vector<Particle&> colliding_particles;
+            findCollidingParticles(p, root, colliding_particles);
+            if (!(colliding_particles.empty())) {
+                for (auto& p1 : colliding_particles) {
+                    p.addCollidingParticle(p1);
+                    p1->addCollidingParticle(p);
+                }
+                foundCollisions = true;
+            }
+            // delete colliding_particles;
+        }
+        if (foundCollisions) {
+            for (auto& p : particles) {
+                p.computeCollisions();
+            }
+            for (auto& p : particles) {
+                p.computeCollisionDisplacement(delta);
+            }
         }
     } while (foundCollisions);
 }

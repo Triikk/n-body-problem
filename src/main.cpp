@@ -62,7 +62,7 @@ int main() {
 
         view.clear();  // clear the buffer
         view.loadParticles(qt.particles);
-        view.loadTree(qt);
+        // view.loadTree(qt);
         view.render();
 
         qt.clean();
