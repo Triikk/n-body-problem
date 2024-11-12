@@ -14,6 +14,7 @@ class Quadtree {
    public:
     Quadtree(float length, vector<Particle>& particles);
     ~Quadtree();
+    friend ostream& operator<<(ostream& os, Quadtree& qt);
     void add(Particle& particle);
     void print();
     void printNodes();

@@ -3,6 +3,8 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <thread>
+#include <chrono>
 
 #include "quadtree.hpp"
 #include "view.hpp"
@@ -48,8 +50,8 @@ vector<Particle> generateSequential(double max, float mass) {
 
 int main() {
     int length = 100;
-    int count = 100;
-    double delta = 0.001, theta = 1;
+    int count = 3;
+    double delta = 0.01, theta = 1;
     float mass = 1e10;
     vector<Particle> particles = generateRandomParticles(count, length, mass);
 
@@ -58,8 +60,11 @@ int main() {
 
     while (true) {
         qt.build();
+        cout << "after build: " << qt << endl;
         qt.computeApproximationValues();
+        cout << "after approximationValues: " << qt << endl;
         qt.updateParticles(theta, delta);
+        cout << "after update: " << qt << endl;
 
         view.clear();  // clear the buffer
         view.loadParticles(qt.particles);
@@ -67,5 +72,7 @@ int main() {
         view.render();
 
         qt.clean();
+
+        // std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 }

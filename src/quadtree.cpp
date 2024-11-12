@@ -176,6 +176,7 @@ void Quadtree::updateParticles(double theta, double delta) {
 void update(Node* node) {
     if (node->children.empty() && !node->particle) {  // leaf with no particle
         node->totalMass = 0;
+        // node->centerOfMass = Position(0, 0);
         return;
     } else if (node->children.empty() && node->particle) {  // leaf with particle
         node->totalMass = node->particle->mass;
@@ -183,12 +184,14 @@ void update(Node* node) {
         return;
     } else if (!node->children.empty()) {
         node->totalMass = 0;
-        node->centerOfMass = Position(node->origin.x + node->length / 2, node->origin.y + node->length / 2);
+        node->centerOfMass = Position(0, 0);
+        // node->centerOfMass = Position(node->origin.x + node->length / 2, node->origin.y + node->length / 2);
         for (auto& child : node->children) {
             update(child);
             node->totalMass += child->totalMass;
             node->centerOfMass += child->centerOfMass * child->totalMass;
         }
+        cout << "com " << node->centerOfMass << endl;
         node->centerOfMass /= node->totalMass;
         return;
     }
@@ -200,20 +203,22 @@ void update(Node* node) {
  */
 void Quadtree::computeApproximationValues() { update(root); }
 
-void Quadtree::print() { std::cerr << "Quadtree<length=" << length << ",root=" << *root << ">" << std::endl; }
-
-void printNodesRecursive(Node* node) {
+void printNodesRecursive(ostream& os, Node* node) {
     if (!node) {
-        // cerr << "\tnode=<null>" << endl;
+        os << "\tnode=<null>" << endl;
         return;
     }
-    // cerr << "\t" << *node << endl;
+    os << "\t" << *node << endl;
     for (Node* child : node->children) {
-        printNodesRecursive(child);
+        printNodesRecursive(os, child);
     }
 }
 
-void Quadtree::printNodes() { printNodesRecursive(root); }
+ostream& operator<<(ostream& os, Quadtree& qt) {
+    os << "Quadtree<length=" << qt.length << ",root=" << *qt.root << ">" << endl;
+    printNodesRecursive(os, qt.root);
+    return os;
+}
 
 void Quadtree::clean() {
     // cerr << "clean tree" << endl;
