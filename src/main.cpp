@@ -25,6 +25,7 @@ vector<Particle> generateRandomParticles(int count, int length, float mass) {
             p = Particle(mass, Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
         } while (!isPositionAvailable(particles, p.position));
         particles.push_back(p);
+        // cout << p.radius << endl;
     }
     /*cerr << "InitParticles:" << endl;
     for (auto &p : particles) {
@@ -47,7 +48,7 @@ vector<Particle> generateSequential(double max, float mass) {
 
 int main() {
     int length = 100;
-    int count = 500;
+    int count = 100;
     double delta = 0.001, theta = 1;
     float mass = 1e10;
     vector<Particle> particles = generateRandomParticles(count, length, mass);

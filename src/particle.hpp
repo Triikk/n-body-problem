@@ -16,7 +16,7 @@ class Particle {
     Velocity velocity;
     Velocity collision_velocity;
     Acceleration acceleration;
-    vector<Particle&> colliding_particles;
+    vector<Particle*> colliding_particles;
 
    public:
     Particle();
@@ -26,7 +26,7 @@ class Particle {
     void computeDisplacement(float delta);
     void computeCollisionDisplacement(float delta);
     void computeSingleForce(Particle& actor);
-    void addCollidingParticle(Particle& particle);
+    void addCollidingParticle(Particle* particle);
     void computeCollisions();
 
     static bool doCollide(Particle& p1, Particle& p2);

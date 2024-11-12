@@ -115,17 +115,24 @@ void View::loadParticles(vector<Particle> &particles) {
         particlePositions.push_back(vec2(p.position.x, p.position.y));
     }
 
-    // bind buffers
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // load projection matrix and particle positions
-    glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particlePositions.size() * sizeof(vec2), particlePositions.data());
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-    glEnableVertexAttribArray(0);
-    glDrawArrays(GL_POINTS, 0, particlePositions.size());
+    int numTriangles = 10;
+    for (auto &p : particles) {
+        vector<vec2> vertexes;
+        vertexes.push_back(vec2(p.position.x, p.position.y));
+        float step = 2 * M_PI / numTriangles;
+        for (int i = 0; i <= numTriangles; i++) {
+            vertexes.push_back(vec2(p.position.x + cos(i * step) * p.radius, p.position.y + sin(i * step) * p.radius));
+        }
+        // bind buffers
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        // load projection matrix and particle positions
+        glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertexes.size() * sizeof(vec2), vertexes.data());
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+        glEnableVertexAttribArray(0);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, vertexes.size());
+    }
 }
 
 void View::render() {
@@ -178,7 +185,7 @@ View::View(Quadtree &qt, int windowLength) {
     glUseProgram(shaderProgram);
     glPointSize(4);
     glLineWidth(0.1);
-    // glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
 }
 
 View::~View() {

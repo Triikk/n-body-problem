@@ -5,7 +5,7 @@
 #include "position.hpp"
 #include "particle.hpp"
 
-#define G 6.674304e-10
+#define G 6.674304e-12
 
 Particle::Particle() {};
 
@@ -46,8 +46,8 @@ void Particle::computeSingleForce(Particle& actor) {
     }
 }
 
-void Particle::addCollidingParticle(Particle& particle) {
-    assert(!(*this == particle));
+void Particle::addCollidingParticle(Particle* particle) {
+    assert(!(*this == *particle));
     colliding_particles.push_back(particle);
 }
 
@@ -60,9 +60,11 @@ void Particle::computeCollisions() {
     collision_velocity = Velocity(0, 0);
     for (auto& p : colliding_particles) {
         collision_velocity.x +=
-            ((mass * velocity.x) + (p.mass * p.velocity.x) + (p.mass * (p.velocity.x - velocity.x))) / (mass + p.mass);
+            ((mass * velocity.x) + (p->mass * p->velocity.x) + (p->mass * (p->velocity.x - velocity.x))) /
+            (mass + p->mass);
         collision_velocity.y +=
-            ((mass * velocity.y) + (p.mass * p.velocity.y) + (p.mass * (p.velocity.y - velocity.y))) / (mass + p.mass);
+            ((mass * velocity.y) + (p->mass * p->velocity.y) + (p->mass * (p->velocity.y - velocity.y))) /
+            (mass + p->mass);
     }
 }
 
