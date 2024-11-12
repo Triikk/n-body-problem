@@ -97,13 +97,11 @@ void Quadtree::computeNetForce(Particle& p, double theta) {
 // traverse the tree recursively and return the vector of particles which are centered inside the area of collision
 // of p
 void findCollidingParticles(Particle& p, Node* node, vector<Particle*>& colliding_particles) {
-    if (*node->particle == p) {  // avoid checking the node which contains the particle itself
-        return;
-    }
     if (node->children.empty() && !node->particle) {  //  empty node without children
         return;
     } else if (node->particle) {  //  leaf node therefore check if the particle collides
         // TO DO
+        if (*node->particle == p) return;
         if (Particle::doCollide(p, *node->particle)) {
             colliding_particles.push_back(node->particle);
         }
@@ -118,33 +116,36 @@ void findCollidingParticles(Particle& p, Node* node, vector<Particle*>& collidin
 
 void Quadtree::manageCollisions(double delta) {
     bool foundCollisions = false;
-    do {
-        for (auto& p : particles) {
-            p.colliding_particles.clear();
-            p.acceleration = Acceleration(0, 0);
-        }
-        foundCollisions = false;
-        for (auto& p : particles) {
-            vector<Particle*> colliding_particles;
-            findCollidingParticles(p, root, colliding_particles);
-            if (!(colliding_particles.empty())) {
-                for (auto& p1 : colliding_particles) {
+    // do {
+    for (auto& p : particles) {
+        p.colliding_particles.clear();
+        p.acceleration = Acceleration(0, 0);
+    }
+    foundCollisions = false;
+    for (auto& p : particles) {
+        vector<Particle*> colliding_particles;
+        findCollidingParticles(p, root, colliding_particles);
+        if (!(colliding_particles.empty())) {
+            for (auto& p1 : colliding_particles) {
+                if (find(p1->colliding_particles.begin(), p1->colliding_particles.end(), &p) ==
+                    p1->colliding_particles.end()) {
                     p.addCollidingParticle(p1);
                     p1->addCollidingParticle(&p);
                 }
-                foundCollisions = true;
             }
-            // delete colliding_particles;
+            foundCollisions = true;
         }
-        if (foundCollisions) {
-            for (auto& p : particles) {
-                p.computeCollisions();
-            }
-            for (auto& p : particles) {
-                p.computeCollisionDisplacement(delta);
-            }
+        // delete colliding_particles;
+    }
+    if (foundCollisions) {
+        for (auto& p : particles) {
+            p.computeCollisions();
         }
-    } while (foundCollisions);
+        for (auto& p : particles) {
+            p.computeCollisionDisplacement(delta);
+        }
+    }
+    // } while (foundCollisions);
 }
 
 /**
@@ -167,6 +168,7 @@ void Quadtree::updateParticles(double theta, double delta) {
     for (auto& p : particles) {
         p.computeDisplacement(delta);
     }
+    manageCollisions(delta);
     assert(!particles.empty());
 }
 
@@ -174,6 +176,7 @@ void Quadtree::updateParticles(double theta, double delta) {
  * Update total mass and center of mass of each node below `node`.
  */
 void update(Node* node) {
+    if (!node) return;
     if (node->children.empty() && !node->particle) {  // leaf with no particle
         node->totalMass = 0;
         // node->centerOfMass = Position(0, 0);
@@ -191,7 +194,7 @@ void update(Node* node) {
             node->totalMass += child->totalMass;
             node->centerOfMass += child->centerOfMass * child->totalMass;
         }
-        cout << "com " << node->centerOfMass << endl;
+        // cout << "com " << node->centerOfMass << endl;
         node->centerOfMass /= node->totalMass;
         return;
     }
@@ -215,6 +218,9 @@ void printNodesRecursive(ostream& os, Node* node) {
 }
 
 ostream& operator<<(ostream& os, Quadtree& qt) {
+    if (!qt.root) {
+        return os;
+    }
     os << "Quadtree<length=" << qt.length << ",root=" << *qt.root << ">" << endl;
     printNodesRecursive(os, qt.root);
     return os;

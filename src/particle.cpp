@@ -5,18 +5,18 @@
 #include "position.hpp"
 #include "particle.hpp"
 
-#define G 6.674304e-8
+#define G 6.674304e-10
 
 Particle::Particle() {};
 
 Particle::Particle(double mass, Position position)
     : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {
-    radius = pow(mass, 1.0 / 2.0) / 1e2;
+    radius = pow(mass, 1.0 / 3) / 1e3;
 }
 
 ostream& operator<<(ostream& os, const Particle& p) {
     os << "<Particle<mass=" << p.mass << ",pos=" << p.position << ",vel=" << p.velocity << ",acc=" << p.acceleration
-       << ">";
+       << ",radius=" << p.radius << ">";
     return os;
 }
 
@@ -69,7 +69,9 @@ void Particle::computeCollisions() {
 }
 
 void Particle::computeCollisionDisplacement(float delta) {
-    velocity = collision_velocity;
+    if (collision_velocity != Velocity(0, 0)) {
+        velocity = collision_velocity;
+    }
 
     computeDisplacement(delta);
 }

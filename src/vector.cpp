@@ -19,7 +19,7 @@ Vector Vector::operator/=(long double scalar) {
     return *this;
 }
 
-bool Vector::operator==(const Vector& v) { return abs(x - v.x) < 1e-6 && abs(y - v.y) < 1e-6; }
+bool Vector::operator==(const Vector& v) { return abs(x - v.x) < 1e-9 && abs(y - v.y) < 1e-9; }
 
 bool Vector::operator!=(const Vector& v) { return !(*this == v); }
 

@@ -20,27 +20,32 @@
 using namespace std;
 using namespace glm;
 
-GLuint VBO, VAO, VBOqt, VAOqt;
+GLuint VBO, VAO, VBOqt, VAOqt, VBOcolor;
 
 GLuint shaderProgram;
 GLuint projectionMatrixID;
+GLuint colorID;
 GLFWwindow *window;
 mat4 projection;
 
 const char *vertexShaderSource = R"(
 #version 330 core
 layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec3 aColor;
+out vec3 vertexColor;
 uniform mat4 projection;
 void main() {
     gl_Position = projection*vec4(aPos, 0.0, 1.0);
+    vertexColor = aColor;
 }
 )";
 
 const char *fragmentShaderSource = R"(
 #version 330 core
+in vec3 vertexColor;
 out vec4 FragColor;
 void main() {
-    FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    FragColor = vec4(vertexColor, 1.0);
 }
 )";
 
@@ -110,38 +115,53 @@ void View::loadTree(Quadtree &qt) {
 }
 
 void View::loadParticles(vector<Particle> &particles) {
-    vector<vec2> particlePositions;
-    for (auto &p : particles) {
-        particlePositions.push_back(vec2(p.position.x, p.position.y));
+    vector<vec2> vertexes;
+    vector<vec3> colors;
+
+    int numTriangles = 20;
+    float step = 2 * M_PI / numTriangles;
+
+    for (int i = 0; i < (int)particles.size(); i++) {
+        vec3 color = vec3(abs(cos(i)), abs(sin(i)), (float)i / particles.size());
+        // vec3 color = vec3(1.0f, 0, 0);
+        Particle p = particles[i];
+        vertexes.push_back(vec2(p.position.x, p.position.y));  // Center of the circle
+        colors.push_back(color);
+        for (int i = 0; i <= numTriangles; i++) {  // <= to close the circle
+            float angle = i * step;
+            vertexes.push_back(vec2(p.position.x + cos(angle) * p.radius, p.position.y + sin(angle) * p.radius));
+            colors.push_back(color);
+        }
     }
 
-    // int numTriangles = 10;
-    // for (auto &p : particles) {
-    //     vector<vec2> vertexes;
-    //     vertexes.push_back(vec2(p.position.x, p.position.y));
-    //     float step = 2 * M_PI / numTriangles;
-    //     for (int i = 0; i <= numTriangles; i++) {
-    //         vertexes.push_back(vec2(p.position.x + cos(i * step) * p.radius, p.position.y + sin(i * step) *
-    //         p.radius));
-    //     }
-    //     // bind buffers
-    //     glBindVertexArray(VAO);
-    //     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //     // load projection matrix and particle positions
-    //     glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
-    //     glBufferSubData(GL_ARRAY_BUFFER, 0, vertexes.size() * sizeof(vec2), vertexes.data());
-    //     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    //     glEnableVertexAttribArray(0);
-    //     glDrawArrays(GL_TRIANGLE_FAN, 0, vertexes.size());
-    // }
+    // Bind buffers
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // load projection matrix and particle positions
-    glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particlePositions.size() * sizeof(vec2), particlePositions.data());
+
+    // Load vertex positions
+    glBufferData(GL_ARRAY_BUFFER, vertexes.size() * sizeof(vec2), vertexes.data(), GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glDrawArrays(GL_POINTS, 0, particlePositions.size());
+
+    // Load vertex colors
+    glBindBuffer(GL_ARRAY_BUFFER, VBOcolor);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(vec3), colors.data(), GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(1);
+
+    // Load projection matrix
+    glUniformMatrix4fv(projectionMatrixID, 1, GL_FALSE, value_ptr(projection));
+
+    // Draw all particles
+    int offset = 0;
+    for (auto &_ : particles) {
+        glDrawArrays(GL_TRIANGLE_FAN, offset, numTriangles + 2);  // +2 for center and closing vertex
+        offset += numTriangles + 2;
+    }
+
+    // Unbind buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void View::render() {
@@ -155,6 +175,7 @@ void initializeVertexBuffers() {
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAOqt);
     glGenBuffers(1, &VBOqt);
+    glGenBuffers(1, &VBOcolor);
 }
 
 View::View(Quadtree &qt, int windowLength) {
@@ -190,6 +211,7 @@ View::View(Quadtree &qt, int windowLength) {
     // convertion from world coordinate to screen coordinate
     projection = ortho(0.0f, (float)qt.length, 0.0f, (float)qt.length, -1.0f, 1.0f);
     projectionMatrixID = glGetUniformLocation(shaderProgram, "projection");
+    colorID = glGetUniformLocation(shaderProgram, "color");
 
     glUseProgram(shaderProgram);
     glPointSize(4);
