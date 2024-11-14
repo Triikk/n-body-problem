@@ -11,15 +11,15 @@
 
 using namespace std;
 
-bool isPositionAvailable(vector<Particle>& particles, Position p1) {
+bool isPositionAvailable(vector<Particle>& particles, Particle& p) {
     for (auto particle : particles) {
-        if (p1 == particle.position) return false;
+        if (Particle::doCollide(particle, p)) return false;
     }
     return true;
 }
 
 // generate randomly particles in all different positions
-vector<Particle> generateRandomParticles(int count, int length, float mass) {
+vector<Particle> generateRandomParticles(int count, int length, double max_mass) {
     vector<Particle> particles;
     // Particle bigParticle = Particle(1e12, Position(50, 50));
     // particles.push_back(bigParticle);
@@ -28,8 +28,9 @@ vector<Particle> generateRandomParticles(int count, int length, float mass) {
         do {
             // p = Particle((rand() % 10 + 1) * 1e7,
             //              Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
+            float mass = (1 - pow(((float)rand() / RAND_MAX), 2.0)) * max_mass;
             p = Particle(mass, Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
-        } while (!isPositionAvailable(particles, p.position));
+        } while (!isPositionAvailable(particles, p));
         // // double dx = p.position.x - 50;
         // // double dy = p.position.y - 50;
         // // double theta = acos(dx / Position::distance(p.position, bigParticle.position));
@@ -62,11 +63,11 @@ vector<Particle> generateSequential(double max, float mass) {
 }
 
 int main() {
-    int length = 100;
-    int count = 20;
-    double delta = 0.01, theta = 1;
-    float mass = 1e10;
-    vector<Particle> particles = generateRandomParticles(count, length, mass);
+    int length = 100000;
+    int count = 1000;
+    double delta = 0.1, theta = 2;
+    float max_mass = 1e18;
+    vector<Particle> particles = generateRandomParticles(count, length, max_mass);
 
     Quadtree qt = Quadtree(length, particles);
     View view = View(qt, 800);

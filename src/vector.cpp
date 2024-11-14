@@ -19,6 +19,10 @@ Vector Vector::operator/=(long double scalar) {
     return *this;
 }
 
+float Vector::operator*(Vector vector) { return x * vector.x + y * vector.y; }
+
+Vector Vector::operator-(Vector vector) { return Vector(x - vector.x, y - vector.y); }
+
 bool Vector::operator==(const Vector& v) { return abs(x - v.x) < 1e-9 && abs(y - v.y) < 1e-9; }
 
 bool Vector::operator!=(const Vector& v) { return !(*this == v); }

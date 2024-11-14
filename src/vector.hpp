@@ -15,6 +15,8 @@ class Vector {
     Vector operator+=(const Vector& v);
     Vector operator*(long double scalar);
     Vector operator/=(long double scalar);
+    float operator*(Vector v);
+    Vector operator-(Vector v);
     bool operator==(const Vector& v);
     bool operator!=(const Vector& v);
     friend ostream& operator<<(ostream& os, const Vector& v);

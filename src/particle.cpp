@@ -1,17 +1,18 @@
 #include <ostream>
+#include <iostream>
 #include <cassert>
 #include <cmath>
 
 #include "position.hpp"
 #include "particle.hpp"
 
-#define G 6.674304e-10
+#define G 6.674304e-11
 
 Particle::Particle() {};
 
 Particle::Particle(double mass, Position position)
     : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {
-    radius = pow(mass, 1.0 / 3) / 1e3;
+    radius = pow(mass, 1.0 / 3) / 5e3;
 }
 
 ostream& operator<<(ostream& os, const Particle& p) {
@@ -59,13 +60,12 @@ void Particle::computeCollisions() {
     assert(acceleration == Acceleration(0, 0));
     collision_velocity = Velocity(0, 0);
     for (auto& p : colliding_particles) {
-        collision_velocity.x +=
-            ((mass * velocity.x) + (p->mass * p->velocity.x) + (p->mass * (p->velocity.x - velocity.x))) /
-            (mass + p->mass);
-        collision_velocity.y +=
-            ((mass * velocity.y) + (p->mass * p->velocity.y) + (p->mass * (p->velocity.y - velocity.y))) /
-            (mass + p->mass);
+        collision_velocity += velocity - (position - p->position) * ((2 * p->mass) / (mass + p->mass)) *
+                                             (((velocity - p->velocity) * (position - p->position)) /
+                                              (pow(Position::distance(position, p->position), 2.0)));
     }
+    // cout << "coll_vel: " << collision_velocity << endl;
+    // cout << "pos: " << position << endl;
 }
 
 void Particle::computeCollisionDisplacement(float delta) {
