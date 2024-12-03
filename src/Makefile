@@ -1,5 +1,6 @@
 CC=g++
-CFLAGS=-Wall -Wextra -std=c++11 -fsanitize=address,undefined -g
+# CFLAGS=-Wall -Wextra -std=c++11 -fsanitize=address,undefined -g
+CFLAGS=-Wall -Wextra -std=c++11 -g
 LFLAGS=-lglfw
 OUT=n-body
 
