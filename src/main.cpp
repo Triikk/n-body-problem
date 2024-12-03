@@ -37,7 +37,8 @@ vector<Particle> generateRandomParticles(int count, int length, double max_mass)
         do {
             // p = Particle((rand() % 10 + 1) * 1e7,
             //              Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
-            float mass = (1 - pow(((float)rand() / RAND_MAX), 2.0)) * max_mass;
+            float rand_mass = (float)rand() / RAND_MAX;
+            float mass = (1 - rand_mass * rand_mass) * max_mass;
             p = Particle(mass, Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
         } while (collides(particles, p));
         // // double dx = p.position.x - 50;
@@ -105,7 +106,7 @@ vector<Particle> initializeBlackHoleSystem(int count) {
 int main() {
     // int length = 100;
     // int count = 5;
-    double delta = 0.5, theta = 1.0;
+    double delta = 0.5, theta = 1;
     // float mass = 1e11;
     // vector<Particle> particles = generateRandomParticles(count, length, mass);
 

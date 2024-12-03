@@ -40,9 +40,9 @@ void Particle::computeSingleForce(Particle& actor) {
         float dx = actor.position.x - position.x;                              // d.x
         float dy = actor.position.y - position.y;                              // d.y
 
-        float acc_module = G * actor.mass / pow(distance_module, 2.0);  // a
-        float acc_x = acc_module * (dx / distance_module);              // a.x
-        float acc_y = acc_module * (dy / distance_module);              // a.y
+        float acc_module = G * actor.mass / (distance_module * distance_module);  // a
+        float acc_x = acc_module * (dx / distance_module);                        // a.x
+        float acc_y = acc_module * (dy / distance_module);                        // a.y
 
         acceleration.x += acc_x;
         acceleration.y += acc_y;
@@ -62,9 +62,10 @@ void Particle::computeCollisions() {
     assert(acceleration == Acceleration(0, 0));
     collision_velocity = Velocity(0, 0);
     for (auto& p : colliding_particles) {
-        collision_velocity += velocity - (position - p->position) * ((2 * p->mass) / (mass + p->mass)) *
-                                             (((velocity - p->velocity) * (position - p->position)) /
-                                              (pow(Position::distance(position, p->position), 2.0)));
+        double distance = Position::distance(position, p->position);
+        collision_velocity +=
+            velocity - (position - p->position) * ((2 * p->mass) / (mass + p->mass)) *
+                           (((velocity - p->velocity) * (position - p->position)) / (distance * distance));
     }
     // cout << "coll_vel: " << collision_velocity << endl;
     // cout << "pos: " << position << endl;
