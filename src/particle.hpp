@@ -11,9 +11,9 @@ using namespace std;
 class Particle {
    public:
     double mass;
-    double radius;
     Position position;
     Velocity velocity;
+    double radius;
     Velocity collision_velocity;
     Acceleration acceleration;
     vector<Particle*> colliding_particles;
@@ -21,6 +21,7 @@ class Particle {
    public:
     Particle();
     Particle(double mass, Position position);
+    Particle(double mass, Position position, Velocity velocity, double radius);
     friend ostream& operator<<(ostream& os, const Particle& p);
     bool operator==(const Particle& p);
     void computeDisplacement(float delta);

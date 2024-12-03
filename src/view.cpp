@@ -44,8 +44,10 @@ const char *fragmentShaderSource = R"(
 #version 330 core
 in vec3 vertexColor;
 out vec4 FragColor;
+uniform vec3 defaultColor = vec3(0.0, 1.0, 0.0); // Default color (green)
 void main() {
-    FragColor = vec4(vertexColor, 1.0);
+    vec3 color = vertexColor != vec3(0.0) ? vertexColor : defaultColor; // Use default color if vertexColor is not set
+    FragColor = vec4(color, 1.0);
 }
 )";
 
@@ -122,8 +124,13 @@ void View::loadParticles(vector<Particle> &particles) {
     float step = 2 * M_PI / numTriangles;
 
     for (int i = 0; i < (int)particles.size(); i++) {
-        vec3 color = vec3(abs(cos(i)), abs(sin(i)), (float)i / particles.size());
-        // vec3 color = vec3(1.0f, 0, 0);
+        // vec3 color = vec3(abs(cos(i)), abs(sin(i)), (float)i / particles.size());
+        vec3 color;
+        if (i == 0) {
+            color = vec3(1.0f, 1.0f, 0.0f);
+        } else {
+            color = vec3(1.0f, 1.0f, 1.0f);
+        }
         Particle p = particles[i];
         vertexes.push_back(vec2(p.position.x, p.position.y));  // Center of the circle
         colors.push_back(color);

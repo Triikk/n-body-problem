@@ -97,10 +97,11 @@ void Quadtree::computeNetForce(Particle& p, double theta) {
 // traverse the tree recursively and return the vector of particles which are centered inside the area of collision
 // of p
 void findCollidingParticles(Particle& p, Node* node, vector<Particle*>& colliding_particles) {
-    if (node->children.empty() && !node->particle) {  //  empty node without children
+    if (!node->containsCollisionArea(p)) {
+        return;
+    } else if (node->children.empty() && !node->particle) {  //  empty node without children
         return;
     } else if (node->particle) {  //  leaf node therefore check if the particle collides
-        // TO DO
         if (*node->particle == p) return;
         if (Particle::doCollide(p, *node->particle)) {
             colliding_particles.push_back(node->particle);

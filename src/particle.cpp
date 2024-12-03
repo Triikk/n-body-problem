@@ -5,15 +5,17 @@
 
 #include "position.hpp"
 #include "particle.hpp"
-
-#define G 6.674304e-11
+#include "physics.hpp"
 
 Particle::Particle() {};
 
 Particle::Particle(double mass, Position position)
     : mass{mass}, position{position}, velocity{Velocity()}, acceleration{Acceleration()} {
-    radius = pow(mass, 1.0 / 3) / 5e3;
+    radius = pow(mass, 1.0 / 3) / 1e3;
 }
+
+Particle::Particle(double mass, Position position, Velocity velocity, double radius)
+    : mass{mass}, position{position}, velocity{velocity}, radius{radius}, acceleration{Acceleration()} {}
 
 ostream& operator<<(ostream& os, const Particle& p) {
     os << "<Particle<mass=" << p.mass << ",pos=" << p.position << ",vel=" << p.velocity << ",acc=" << p.acceleration
