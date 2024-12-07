@@ -35,45 +35,28 @@ bool collides(vector<Particle>& particles, Particle& p1) {
 // generate randomly particles in all different positions
 vector<Particle> generateRandomParticles(int count, int length, double max_mass, double radius) {
     vector<Particle> particles;
-    // Particle bigParticle = Particle(1e12, Position(50, 50));
-    // particles.push_back(bigParticle);
     for (int i = 0; i < count; i++) {
         Particle p;
         do {
-            // p = Particle((rand() % 10 + 1) * 1e7,
-            //              Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length));
             float rand_mass = (float)rand() / RAND_MAX;
             float mass = (1 - rand_mass * rand_mass) * max_mass;
             p = Particle(mass, Position(((float)rand() / RAND_MAX) * length, ((float)rand() / RAND_MAX) * length),
                          Velocity(0.0, 0.0), radius);
         } while (collides(particles, p));
-        // // double dx = p.position.x - 50;
-        // // double dy = p.position.y - 50;
-        // // double theta = acos(dx / Position::distance(p.position, bigParticle.position));
-        // // p.velocity.x = dx * sin(theta);
-        // // p.velocity.y = dy * cos(theta);
-        // // double norm = sqrt(pow(p.velocity.x, 2) + pow(p.velocity.y, 2));  // velocity unit vector
-        // // p.velocity /= (norm / (rand() % 10));
-        // p.velocity.y = (rand() % 10) * 1;
         particles.push_back(p);
-        // cout << p.radius << endl;
     }
-
-    /*cerr << "InitParticles:" << endl;
-    for (auto &p : particles) {
-        cerr << "\tparticle " << p << " at " << &p << endl;
-    }*/
     return particles;
 }
 
-vector<Particle> generateSequential(double max, float mass) {
+vector<Particle> generateSequential(double length, int count, float mass, float radius) {
     vector<Particle> particles;
-    for (int x = 0; x < max; x++) {
-        for (int y = 0; y < max; y++) {
-            Particle p = Particle(mass, Position(x, y));
-            // cerr << "\t" << p << " at " << &p << ")" << endl;
-            particles.push_back(p);
-        }
+    double num_rows = sqrt(count);
+    double row_spacing = length / num_rows;
+    for (int i = 0; i < count; i++) {
+        double x = (i / (int)num_rows) * row_spacing;
+        double y = (i % (int)num_rows) * row_spacing;
+        Particle p = Particle(mass, Position(x, y), Velocity(0.0, 0.0), radius);
+        particles.push_back(p);
     }
     return particles;
 }
@@ -100,37 +83,36 @@ vector<Particle> initializeBlackHoleSystem(double length, int count) {
             double x = offsetX + distance * cos(angle);
             double y = offsetY + distance * sin(angle);
             Position pos = Position(x, y);
-            double velocityMagnitude = sqrt(G * blackHoleMass / distance);
+            double velocityMagnitude = sqrt(G * blackHoleMass / distance) * (0.95 + (double)rand() / 10 / RAND_MAX);
             Velocity vel = Velocity(-velocityMagnitude * sin(angle), velocityMagnitude * cos(angle));
-            p = Particle(mass, pos, vel, 1e7);
+            p = Particle(mass, pos, vel, blackHoleRadius / 1e2);
         } while (collides(particles, p));
-        // } while (false);
         particles.push_back(p);
     }
     return particles;
 }
 
 int main(int argc, char* argv[]) {
-    double delta = 0.5, theta = 1;
-    if (argc > 2) {
-        delta = atof(argv[0]);
-        theta = atof(argv[1]);
+    double delta = 0.01, theta = 1, length = 1e10;
+    int count = 1e2;
+    switch (argc) {
+        case 5:
+            count = atoi(argv[4]);
+        case 4:
+            length = atof(argv[3]);
+        case 3:
+            theta = atof(argv[2]);
+            delta = atof(argv[1]);
     }
 
-    // int length = 100;
-    // int count = 5;
-    // float mass = 1e11;
-    // vector<Particle> particles = generateRandomParticles(count, length, mass);
-
-    double length = 5e10;
-    int count = 1e5;
     vector<Particle> particles = initializeBlackHoleSystem(length, count);
-    // vector<Particle> particles = generateRandomParticles(count, length, 1e5, 1e2);
-
     Quadtree qt = Quadtree(length, particles);
 
+    string windowTitle =
+        "N-body simulation (n=" + to_string(count) + ",Δ=" + to_string(delta) + ",θ=" + to_string(theta) + ")";
+
 #ifdef VIEW
-    View view = View(qt, 800);
+    View view = View(qt, 800, windowTitle);
     int renderIterations = 1;
 #endif
 
@@ -140,14 +122,10 @@ int main(int argc, char* argv[]) {
 
     while (!qt.particles.empty()) {
         i++;
-        // cout << "iteration " << i << "\n";
         qt.build();
-        // cout << "after build: " << qt << endl;
         qt.computeApproximationValues();
-        // cout << "after approximationValues: " << qt << endl;
         qt.updateParticles(theta, delta);
         assert(!qt.particles.empty());
-        // cout << "after update: " << qt << endl;
 
 #ifdef VIEW
         if (i % renderIterations == 0) {

@@ -1,6 +1,6 @@
 CC=g++
-# CFLAGS=-Wall -Wextra -O3 -std=c++11 -fsanitize=address,undefined -g
-CFLAGS=-Wall -Wextra -std=c++11 -fopenmp
+CFLAGS=-Wall -Wextra -O3 -std=c++11 -fsanitize=address,undefined -g -fopenmp -Wno-implicit-fallthrough
+# CFLAGS=-Wall -Wextra -std=c++11 -fopenmp
 LFLAGS=-lglfw
 OUT=n-body
 

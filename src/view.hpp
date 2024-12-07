@@ -9,7 +9,7 @@ using namespace std;
 
 class View {
    public:
-    View(Quadtree& qt, int windowLength);
+    View(Quadtree& qt, int windowLength, string windowTitle);
     ~View();
     void clear();
     void render();

@@ -185,12 +185,12 @@ void initializeVertexBuffers() {
     glGenBuffers(1, &VBOcolor);
 }
 
-View::View(Quadtree &qt, int windowLength) {
+View::View(Quadtree &qt, int windowLength, string windowTitle) {
     if (!glfwInit()) {
         exit(EXIT_FAILURE);
     }
 
-    window = glfwCreateWindow(windowLength, windowLength, "N-body simulation", NULL, NULL);
+    window = glfwCreateWindow(windowLength, windowLength, windowTitle.c_str(), NULL, NULL);
     if (!window) {
         glfwTerminate();
         exit(EXIT_FAILURE);
