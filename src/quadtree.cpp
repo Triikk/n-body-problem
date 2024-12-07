@@ -117,12 +117,12 @@ void findCollidingParticles(Particle& p, Node* node, vector<Particle*>& collidin
 
 void Quadtree::manageCollisions(double delta) {
     bool foundCollisions = false;
-    // do {
+#pragma omp parallel for
     for (auto& p : particles) {
         p.colliding_particles.clear();
         p.acceleration = Acceleration(0, 0);
     }
-    foundCollisions = false;
+#pragma omp parallel for
     for (auto& p : particles) {
         vector<Particle*> colliding_particles;
         findCollidingParticles(p, root, colliding_particles);
@@ -136,17 +136,18 @@ void Quadtree::manageCollisions(double delta) {
             }
             foundCollisions = true;
         }
-        // delete colliding_particles;
     }
+
     if (foundCollisions) {
+#pragma omp parallel for
         for (auto& p : particles) {
             p.computeCollisions();
         }
+#pragma omp parallel for
         for (auto& p : particles) {
             p.computeCollisionDisplacement(delta);
         }
     }
-    // } while (foundCollisions);
 }
 
 /**
@@ -160,16 +161,18 @@ void Quadtree::updateParticles(double theta, double delta) {
     for (auto& p : particles) {
         p.acceleration = Acceleration(0, 0);
     }
+#pragma omp parallel for
     for (auto& p : particles) {
         computeNetForce(p, theta);
     }
-    // remove particles outside the quadtree
-    particles.erase(std::remove_if(particles.begin(), particles.end(), [&](Particle& p) { return isOutside(p); }),
-                    particles.end());
+#pragma omp parallel for
     for (auto& p : particles) {
         p.computeDisplacement(delta);
     }
     manageCollisions(delta);
+    // remove particles outside the quadtree
+    particles.erase(std::remove_if(particles.begin(), particles.end(), [&](Particle& p) { return isOutside(p); }),
+                    particles.end());
     assert(!particles.empty());
 }
 
@@ -205,7 +208,20 @@ void update(Node* node) {
 /**
  * Compute centers of mass
  */
-void Quadtree::computeApproximationValues() { update(root); }
+void Quadtree::computeApproximationValues() {
+#pragma omp parallel for
+    for (auto& child : root->children) {
+        update(child);
+    }
+    root->totalMass = 0;
+    root->centerOfMass = Position(0, 0);
+    for (auto& child : root->children) {
+        root->totalMass += child->totalMass;
+        root->centerOfMass += child->centerOfMass * child->totalMass;
+    }
+    root->centerOfMass /= root->totalMass;
+    // update(root);
+}
 
 void printNodesRecursive(ostream& os, Node* node) {
     if (!node) {
